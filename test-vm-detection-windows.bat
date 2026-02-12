@@ -229,4 +229,57 @@ if %DETECTED%==0 (
 )
 
 echo.
+
+REM 保存结果到文件
+set OUTPUT_FILE=vm-detection-%date:~0,4%%date:~5,2%%date:~8,2%-%time:~0,2%%time:~3,2%%time:~6,2%.txt
+set OUTPUT_FILE=%OUTPUT_FILE: =0%
+
+echo 正在保存检测结果到文件...
+(
+echo ==========================================
+echo   虚拟化检测测试结果
+echo   测试时间: %date% %time%
+echo ==========================================
+echo.
+echo 1. 系统信息
+echo ----------------------------
+echo 系统制造商: %SYS_MANUFACTURER%
+echo 系统型号: %SYS_MODEL%
+echo.
+echo 2. BIOS 信息
+echo ----------------------------
+echo BIOS 制造商: %BIOS_MANUFACTURER%
+echo BIOS 版本: %BIOS_VERSION%
+echo BIOS 序列号: %BIOS_SERIAL%
+echo.
+echo 3. 主板信息
+echo ----------------------------
+echo 主板制造商: %BOARD_MANUFACTURER%
+echo 主板产品: %BOARD_PRODUCT%
+echo.
+echo 4. CPU 信息
+echo ----------------------------
+echo CPU 名称: %CPU_NAME%
+echo.
+echo 5. 检测结果汇总
+echo ----------------------------
+echo 总测试数: %TOTAL_TESTS%
+echo 检测到虚拟化: %DETECTED%
+echo 通过测试: %PASSED%
+echo.
+if %DETECTED%==0 (
+    echo [√] 优秀! 未检测到明显的虚拟化特征
+) else if %DETECTED% LEQ 3 (
+    echo [!] 警告: 检测到少量虚拟化特征
+) else (
+    echo [X] 注意: 检测到较多虚拟化特征
+)
+echo.
+echo ==========================================
+) > "%OUTPUT_FILE%"
+
+echo.
+echo 检测结果已保存到: %OUTPUT_FILE%
+echo 文件位置: %CD%\%OUTPUT_FILE%
+echo.
 pause
