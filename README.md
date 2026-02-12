@@ -23,7 +23,7 @@ sudo apt update && sudo apt install qemu-system-x86 qemu-utils -y
 brew install qemu
 ```
 
-### 2. 创建虚拟机
+### 2. 创建 Windows 虚拟机
 
 ```bash
 # 赋予脚本执行权限
@@ -31,26 +31,37 @@ chmod +x *.sh
 
 # 启动 Windows 虚拟机
 ./create-windows-vm.sh
-
-# 或启动 Linux 虚拟机
-./create-linux-vm.sh
 ```
 
 首次运行会自动创建磁盘镜像。
 
-### 3. 安装操作系统（可选）
+### 3. 下载 Windows ISO
 
-如需安装系统，编辑启动脚本取消注释：
+从微软官方下载 Windows 10/11 ISO：
+- Windows 10: https://www.microsoft.com/zh-cn/software-download/windows10
+- Windows 11: https://www.microsoft.com/zh-cn/software-download/windows11
+
+将下载的 ISO 文件放到项目目录。
+
+### 4. 安装 Windows 系统
+
+编辑启动脚本挂载 ISO：
 
 ```bash
 nano create-windows-vm.sh
 
-# 找到并取消注释这两行：
--cdrom windows.iso \
+# 找到并取消注释这两行，修改为你的 ISO 文件名：
+-cdrom windows10.iso \
 -boot d \
 ```
 
-### 4. 连接虚拟机
+启动虚拟机：
+
+```bash
+./create-windows-vm.sh
+```
+
+### 5. 连接虚拟机
 
 虚拟机使用 VNC 显示，端口 5900：
 
@@ -62,16 +73,32 @@ localhost:5900
 ssh -L 5900:localhost:5900 user@host
 ```
 
+通过 VNC 连接后，按照 Windows 安装向导完成系统安装。
+
+### 6. 安装完成后
+
+系统安装完成后，重新编辑脚本注释掉 ISO 行：
+
+```bash
+nano create-windows-vm.sh
+
+# 重新注释这两行：
+# -cdrom windows10.iso \
+# -boot d \
+```
+
+然后重启虚拟机即可从硬盘启动。
+
 ## 文件说明
 
 ### 核心脚本
 - `create-windows-vm.sh` - Windows 虚拟机启动脚本
-- `create-linux-vm.sh` - Linux 虚拟机启动脚本
 - `generate-hardware-params.sh` - 硬件参数随机生成器
+- `check-environment.sh` - 环境检查工具
+- `vm-manager.sh` - 虚拟机管理工具
 
 ### 检测工具
-- `test-vm-detection-linux.sh` - Linux 虚拟化检测测试
-- `test-vm-detection-windows.bat` - Windows 虚拟化检测测试
+- `test-vm-detection-windows.bat` - Windows 虚拟化检测测试工具
 
 ## 自定义硬件参数
 
@@ -82,7 +109,7 @@ ssh -L 5900:localhost:5900 user@host
 复制生成的参数到启动脚本中。
 
 ### 方法 2: 手动编辑
-编辑 `create-windows-vm.sh` 或 `create-linux-vm.sh`：
+编辑 `create-windows-vm.sh`：
 
 ```bash
 # 基本配置
@@ -146,8 +173,7 @@ qemu-img convert -f qcow2 -O raw disk.qcow2 disk.img
 
 ## 验证配置
 
-### Windows 系统
-在虚拟机内运行 PowerShell：
+在 Windows 虚拟机内运行 PowerShell 检查硬件信息：
 
 ```powershell
 # 系统信息
@@ -161,31 +187,27 @@ Get-WmiObject Win32_DiskDrive | Select-Object Model,SerialNumber
 
 # 网卡 MAC 地址
 Get-WmiObject Win32_NetworkAdapter | Where-Object {$_.MACAddress} | Select-Object Name,MACAddress
-```
 
-### Linux 系统
-```bash
-# SMBIOS 信息
-sudo dmidecode -t system
-sudo dmidecode -t baseboard
-
-# 硬盘信息
-lsblk -o NAME,MODEL,SERIAL
-
-# 网卡信息
-ip link show
+# CPU 信息
+Get-WmiObject Win32_Processor | Select-Object Name,Manufacturer
 
 # 检测虚拟化
-systemd-detect-virt
+systeminfo | findstr /i "hyper"
+```
+
+或使用提供的检测脚本：
+
+```cmd
+# 在虚拟机内以管理员身份运行
+test-vm-detection-windows.bat
 ```
 
 ## 端口说明
 
 | 端口 | 用途 | 说明 |
 |------|------|------|
-| 5900 | VNC | 虚拟机显示 |
-| 3389 | RDP | Windows 远程桌面 |
-| 2222 | SSH | Linux SSH |
+| 5900 | VNC | 虚拟机显示（安装系统时使用） |
+| 3389 | RDP | Windows 远程桌面（系统安装后使用） |
 
 ## 故障排查
 
