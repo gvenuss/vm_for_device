@@ -115,7 +115,7 @@ qemu-system-x86_64 \
   -netdev user,id=net0,hostfwd=tcp::3389-:3389 \
   -device e1000,netdev=net0,mac=$MAC_ADDRESS \
   \
-  -vga qxl \
+  -device virtio-vga,xres=1920,yres=1080 \
   -vnc :0 \
   -device qemu-xhci,id=xhci \
   -device usb-tablet,bus=xhci.0 \
