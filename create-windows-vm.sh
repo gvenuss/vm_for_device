@@ -12,6 +12,7 @@ DISK_SIZE="100G"
 MEMORY="8192"  # MB
 CPU_CORES="4"
 CPU_THREADS="2"
+ISO_PATH="/app/windows_vm/windows.iso"
 
 # 硬件信息自定义
 BIOS_VENDOR="American Megatrends Inc."
@@ -45,14 +46,21 @@ HDD_WWN="0x50014ee2b5c6d8e9"
 # 网卡 MAC 地址 (Intel OUI)
 MAC_ADDRESS="00:1B:21:3A:4F:5C"
 
+# 检查 ISO 文件是否存在
+if [ ! -f "$ISO_PATH" ]; then
+    echo "错误: ISO 文件不存在: $ISO_PATH"
+    exit 1
+fi
+
 # 检查磁盘镜像是否存在
+FIRST_BOOT=false
 if [ ! -f "$DISK_IMAGE" ]; then
     echo "磁盘镜像不存在，正在创建 $DISK_IMAGE ($DISK_SIZE)..."
     qemu-img create -f qcow2 "$DISK_IMAGE" "$DISK_SIZE"
     echo "磁盘镜像创建完成"
     echo ""
-    echo "请挂载 Windows 安装 ISO 并安装系统"
-    echo "使用方法: 在下面的命令中添加 -cdrom windows.iso -boot d"
+    echo "首次启动，将从 ISO 安装 Windows"
+    FIRST_BOOT=true
     echo ""
 fi
 
@@ -73,8 +81,19 @@ fi
 echo "启动虚拟机: $VM_NAME"
 echo "内存: ${MEMORY}MB, CPU: ${CPU_CORES}核${CPU_THREADS}线程"
 echo "磁盘: $DISK_IMAGE"
+echo "ISO: $ISO_PATH"
 echo "MAC: $MAC_ADDRESS"
 echo "VNC 端口: 5900 (使用 VNC 客户端连接)"
+echo ""
+
+# 设置启动顺序
+if [ "$FIRST_BOOT" = true ]; then
+    BOOT_ORDER="d"  # 从光驱启动（安装系统）
+    echo "首次启动: 从 ISO 安装 Windows"
+else
+    BOOT_ORDER="c"  # 从硬盘启动
+    echo "从硬盘启动已安装的系统"
+fi
 echo ""
 
 # 启动 QEMU
@@ -101,11 +120,8 @@ qemu-system-x86_64 \
   -device qemu-xhci,id=xhci \
   -device usb-tablet,bus=xhci.0 \
   \
-  -boot order=c \
+  -cdrom "$ISO_PATH" \
+  -boot order=$BOOT_ORDER \
   -rtc base=localtime,clock=host \
   -no-hpet \
   -global kvm-pit.lost_tick_policy=discard
-
-# 如果需要安装系统，取消下面两行的注释
-# -cdrom windows.iso \
-# -boot d \
