@@ -74,6 +74,7 @@ echo "启动虚拟机: $VM_NAME"
 echo "内存: ${MEMORY}MB, CPU: ${CPU_CORES}核${CPU_THREADS}线程"
 echo "磁盘: $DISK_IMAGE"
 echo "MAC: $MAC_ADDRESS"
+echo "VNC 端口: 5900 (使用 VNC 客户端连接)"
 echo ""
 
 # 启动 QEMU
@@ -96,7 +97,7 @@ qemu-system-x86_64 \
   -device e1000,netdev=net0,mac=$MAC_ADDRESS \
   \
   -vga qxl \
-  -device intel-hda -device hda-duplex \
+  -vnc :0 \
   -device qemu-xhci,id=xhci \
   -device usb-tablet,bus=xhci.0 \
   \

@@ -55,6 +55,7 @@ echo "磁盘: $DISK_IMAGE"
 echo "系统序列号: $SYSTEM_SERIAL"
 echo "硬盘序列号: $HDD_SERIAL"
 echo "MAC: $MAC_ADDRESS"
+echo "VNC 端口: 5900 (使用 VNC 客户端连接)"
 echo ""
 
 # 启动 QEMU
@@ -74,8 +75,7 @@ qemu-system-x86_64 \
   -device e1000,netdev=net0,mac=$MAC_ADDRESS \
   \
   -vga virtio \
-  -display gtk \
-  -device intel-hda -device hda-duplex \
+  -vnc :0 \
   -device qemu-xhci,id=xhci \
   -device usb-tablet,bus=xhci.0 \
   \

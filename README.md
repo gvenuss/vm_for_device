@@ -1,116 +1,94 @@
-# QEMU 虚拟机反检测配置工具集
+# QEMU 虚拟机反检测配置工具
 
 一套完整的 QEMU 虚拟机配置工具，用于创建难以被检测的虚拟机环境，支持自定义硬件参数。
 
-## 📋 项目概述
+## 功能特性
 
-本项目提供了一整套工具和脚本，帮助你使用 QEMU 创建虚拟机，并实现：
+- ✅ 隐藏虚拟化特征 - 移除 VM、QEMU、KVM 等虚拟化标识
+- ✅ 硬件参数自定义 - 自由修改 CPU、主板、硬盘、网卡等硬件信息
+- ✅ 随机参数生成 - 自动生成真实的硬件序列号和配置
+- ✅ 检测工具 - 验证虚拟机是否能被识别
 
-- ✅ **隐藏虚拟化特征** - 移除 VM、QEMU、KVM 等虚拟化标识
-- ✅ **硬件参数自定义** - 自由修改 CPU、主板、硬盘、网卡等硬件信息
-- ✅ **随机参数生成** - 自动生成真实的硬件序列号和配置
-- ✅ **检测工具** - 验证虚拟机是否能被识别
+## 快速开始
 
-## 📁 文件说明
+### 1. 安装 QEMU
 
-### 文档
-- **QEMU虚拟机配置指南.md** - 完整的配置指南和技术文档
-
-### 虚拟机创建脚本
-- **create-windows-vm.sh** - Windows 虚拟机启动脚本（反检测配置）
-- **create-linux-vm.sh** - Linux 虚拟机启动脚本（反检测配置）
-
-### 工具脚本
-- **generate-hardware-params.sh** - 硬件参数随机生成器
-- **test-vm-detection-linux.sh** - Linux 虚拟化检测测试工具
-- **test-vm-detection-windows.bat** - Windows 虚拟化检测测试工具
-
-## 🚀 快速开始
-
-### 1. 环境准备
-
-#### Ubuntu/Debian
+**Ubuntu/Debian:**
 ```bash
-sudo apt update
-sudo apt install qemu-system-x86 qemu-utils
+sudo apt update && sudo apt install qemu-system-x86 qemu-utils -y
 ```
 
-#### macOS
+**macOS:**
 ```bash
 brew install qemu
 ```
 
-### 2. 创建 Windows 虚拟机
+### 2. 创建虚拟机
 
 ```bash
 # 赋予脚本执行权限
-chmod +x create-windows-vm.sh
+chmod +x *.sh
 
-# 首次运行会自动创建磁盘镜像
+# 启动 Windows 虚拟机
 ./create-windows-vm.sh
-```
 
-**安装系统时**，编辑脚本取消注释以下行：
-```bash
-# -cdrom windows.iso \
-# -boot d \
-```
-
-### 3. 创建 Linux 虚拟机
-
-```bash
-# 赋予脚本执行权限
-chmod +x create-linux-vm.sh
-
-# 运行脚本
+# 或启动 Linux 虚拟机
 ./create-linux-vm.sh
 ```
 
-### 4. 生成随机硬件参数
+首次运行会自动创建磁盘镜像。
 
-如果你想为每个虚拟机使用不同的硬件配置：
+### 3. 安装操作系统（可选）
+
+如需安装系统，编辑启动脚本取消注释：
 
 ```bash
-# 赋予脚本执行权限
-chmod +x generate-hardware-params.sh
+nano create-windows-vm.sh
 
-# 运行生成器
+# 找到并取消注释这两行：
+-cdrom windows.iso \
+-boot d \
+```
+
+### 4. 连接虚拟机
+
+虚拟机使用 VNC 显示，端口 5900：
+
+```bash
+# 使用 VNC 客户端连接
+localhost:5900
+
+# 或通过 SSH 端口转发（推荐）
+ssh -L 5900:localhost:5900 user@host
+```
+
+## 文件说明
+
+### 核心脚本
+- `create-windows-vm.sh` - Windows 虚拟机启动脚本
+- `create-linux-vm.sh` - Linux 虚拟机启动脚本
+- `generate-hardware-params.sh` - 硬件参数随机生成器
+
+### 检测工具
+- `test-vm-detection-linux.sh` - Linux 虚拟化检测测试
+- `test-vm-detection-windows.bat` - Windows 虚拟化检测测试
+
+## 自定义硬件参数
+
+### 方法 1: 使用生成器
+```bash
 ./generate-hardware-params.sh
 ```
+复制生成的参数到启动脚本中。
 
-生成的参数可以直接复制到虚拟机启动脚本中。
-
-### 5. 测试虚拟化检测
-
-#### 在 Linux 虚拟机内
-```bash
-# 将脚本复制到虚拟机内
-chmod +x test-vm-detection-linux.sh
-
-# 运行检测（建议使用 sudo 获得完整结果）
-sudo ./test-vm-detection-linux.sh
-```
-
-#### 在 Windows 虚拟机内
-```cmd
-# 以管理员身份运行
-test-vm-detection-windows.bat
-```
-
-## 📖 使用指南
-
-### 自定义硬件参数
-
-所有虚拟机脚本都包含可配置的硬件参数，你可以根据需要修改：
+### 方法 2: 手动编辑
+编辑 `create-windows-vm.sh` 或 `create-linux-vm.sh`：
 
 ```bash
 # 基本配置
-VM_NAME="Windows-Desktop"
-DISK_IMAGE="windows10.qcow2"
-DISK_SIZE="100G"
-MEMORY="8192"  # MB
-CPU_CORES="4"
-CPU_THREADS="2"
+MEMORY="8192"      # 内存 (MB)
+CPU_CORES="4"      # CPU 核心数
+DISK_SIZE="100G"   # 磁盘大小
 
 # SMBIOS 信息
 SYSTEM_MANUFACTURER="ASUS"
@@ -125,163 +103,147 @@ HDD_MODEL="WDC WD10EZEX-08WN4A0"
 MAC_ADDRESS="00:1B:21:3A:4F:5C"
 ```
 
-### 常见硬件厂商 OUI (MAC 地址前缀)
+## 常用命令
 
-- Intel: `00:1B:21`
-- Realtek: `00:E0:4C`
-- Broadcom: `00:10:18`
-- Qualcomm: `00:03:7F`
+### 虚拟机管理
+```bash
+# 查看虚拟机进程
+ps aux | grep qemu
+
+# 停止虚拟机
+pkill qemu-system-x86_64
+
+# 查看磁盘信息
+qemu-img info windows10.qcow2
+```
+
+### 磁盘快照
+```bash
+# 创建快照
+qemu-img snapshot -c snapshot1 disk.qcow2
+
+# 查看快照列表
+qemu-img snapshot -l disk.qcow2
+
+# 恢复快照
+qemu-img snapshot -a snapshot1 disk.qcow2
+
+# 删除快照
+qemu-img snapshot -d snapshot1 disk.qcow2
+```
 
 ### 磁盘管理
-
-#### 创建磁盘镜像
 ```bash
+# 创建磁盘
 qemu-img create -f qcow2 disk.qcow2 100G
-```
 
-#### 调整磁盘大小
-```bash
+# 扩容磁盘
 qemu-img resize disk.qcow2 +50G
+
+# 转换格式
+qemu-img convert -f qcow2 -O raw disk.qcow2 disk.img
 ```
 
-#### 创建快照
-```bash
-qemu-img snapshot -c snapshot1 disk.qcow2
-```
-
-#### 恢复快照
-```bash
-qemu-img snapshot -a snapshot1 disk.qcow2
-```
-
-#### 查看快照列表
-```bash
-qemu-img snapshot -l disk.qcow2
-```
-
-## 🔍 验证配置
+## 验证配置
 
 ### Windows 系统
-
-使用 PowerShell 检查硬件信息：
+在虚拟机内运行 PowerShell：
 
 ```powershell
 # 系统信息
 Get-WmiObject Win32_ComputerSystem | Select-Object Manufacturer,Model
 
 # BIOS 信息
-Get-WmiObject Win32_BIOS | Select-Object Manufacturer,SerialNumber,Version
+Get-WmiObject Win32_BIOS | Select-Object Manufacturer,SerialNumber
 
 # 硬盘信息
 Get-WmiObject Win32_DiskDrive | Select-Object Model,SerialNumber
-
-# CPU 信息
-Get-WmiObject Win32_Processor | Select-Object Name,Manufacturer
 
 # 网卡 MAC 地址
 Get-WmiObject Win32_NetworkAdapter | Where-Object {$_.MACAddress} | Select-Object Name,MACAddress
 ```
 
 ### Linux 系统
-
 ```bash
-# 查看 SMBIOS 信息
+# SMBIOS 信息
 sudo dmidecode -t system
 sudo dmidecode -t baseboard
-sudo dmidecode -t bios
 
-# 查看硬盘信息
-sudo hdparm -I /dev/sda | grep "Serial Number"
+# 硬盘信息
 lsblk -o NAME,MODEL,SERIAL
 
-# 查看网卡 MAC 地址
+# 网卡信息
 ip link show
 
 # 检测虚拟化
 systemd-detect-virt
 ```
 
-## ⚙️ 高级配置
+## 端口说明
 
-### 网络端口转发
+| 端口 | 用途 | 说明 |
+|------|------|------|
+| 5900 | VNC | 虚拟机显示 |
+| 3389 | RDP | Windows 远程桌面 |
+| 2222 | SSH | Linux SSH |
 
-在虚拟机脚本中添加端口转发：
+## 故障排查
 
+### 虚拟机无法启动
 ```bash
--netdev user,id=net0,hostfwd=tcp::3389-:3389,hostfwd=tcp::2222-:22
+# 检查 QEMU 版本
+qemu-system-x86_64 --version
+
+# 检查 KVM 支持
+ls -l /dev/kvm
+
+# 检查磁盘镜像
+qemu-img check disk.qcow2
 ```
 
-这将：
-- 转发宿主机 3389 端口到虚拟机 3389 (RDP)
-- 转发宿主机 2222 端口到虚拟机 22 (SSH)
-
-### 使用网桥模式
-
-如果需要虚拟机获得独立 IP：
-
+### VNC 无法连接
 ```bash
-# 创建网桥
-sudo ip link add br0 type bridge
-sudo ip link set br0 up
-sudo ip link set eth0 master br0
+# 检查端口
+netstat -tlnp | grep 5900
 
-# 修改 QEMU 配置
--netdev bridge,id=net0,br=br0 \
--device e1000,netdev=net0,mac=00:1B:21:3A:4F:5C
+# 检查防火墙
+ufw allow 5900/tcp
+
+# 检查虚拟机进程
+ps aux | grep qemu
 ```
 
-### 共享文件夹
-
-使用 9p 文件系统共享：
-
+### 性能问题
 ```bash
--virtfs local,path=/host/shared,mount_tag=hostshare,security_model=passthrough,id=hostshare
+# 确认使用 KVM 加速
+ps aux | grep qemu | grep kvm
+
+# 增加资源（编辑启动脚本）
+MEMORY="16384"  # 增加内存
+CPU_CORES="8"   # 增加 CPU 核心
 ```
 
-在虚拟机内挂载：
-```bash
-sudo mount -t 9p -o trans=virtio hostshare /mnt/shared
-```
-
-## 🛠️ 故障排查
-
-### 问题：虚拟机启动失败
-
-**解决方案**：
-1. 检查 QEMU 是否正确安装：`qemu-system-x86_64 --version`
-2. 确认磁盘镜像路径正确
-3. 检查是否有足够的内存和磁盘空间
-
-### 问题：性能很差
-
-**解决方案**：
-1. 确认使用了硬件加速（KVM 或 HVF）
-2. 增加分配的 CPU 核心数和内存
-3. 使用 virtio 驱动（但会增加被检测风险）
-
-### 问题：仍然被检测为虚拟机
-
-**解决方案**：
+### 仍被检测为虚拟机
 1. 运行检测脚本找出问题
 2. 检查是否使用了 virtio 等虚拟化专用设备
 3. 确认 SMBIOS 信息已正确配置
 4. 检查 MAC 地址是否使用了 QEMU 默认前缀 (52:54:00)
 
-### 问题：网络无法连接
+## 常见硬件厂商参考
 
-**解决方案**：
-1. 检查防火墙设置
-2. 确认网络设备配置正确
-3. 尝试使用不同的网络模式（user/bridge/tap）
+### MAC 地址前缀 (OUI)
+- Intel: `00:1B:21`
+- Realtek: `00:E0:4C`
+- Broadcom: `00:10:18`
+- Qualcomm: `00:03:7F`
 
-## 📚 参考资源
+### 主板厂商
+- ASUS: ROG STRIX, TUF GAMING, PRIME
+- MSI: MAG, MPG, MEG
+- Gigabyte: AORUS, Gaming
+- ASRock: Phantom Gaming, Steel Legend
 
-- [QEMU 官方文档](https://www.qemu.org/documentation/)
-- [SMBIOS 规范](https://www.dmtf.org/standards/smbios)
-- [PCI 设备数据库](https://pci-ids.ucw.cz/)
-- [MAC 地址 OUI 查询](https://maclookup.app/)
-
-## ⚠️ 免责声明
+## 免责声明
 
 本工具仅供以下合法用途：
 - 软件兼容性测试
@@ -297,15 +259,14 @@ sudo mount -t 9p -o trans=virtio hostshare /mnt/shared
 
 使用者需自行承担使用本工具的法律责任。
 
-## 📝 许可证
+## 参考资源
 
-本项目仅供学习和研究使用。
-
-## 🤝 贡献
-
-欢迎提交问题和改进建议。
+- [QEMU 官方文档](https://www.qemu.org/documentation/)
+- [SMBIOS 规范](https://www.dmtf.org/standards/smbios)
+- [PCI 设备数据库](https://pci-ids.ucw.cz/)
+- [MAC 地址 OUI 查询](https://maclookup.app/)
 
 ---
 
-**最后更新**: 2026-02-11
-**版本**: 1.0
+**版本**: 1.1
+**最后更新**: 2026-02-12
