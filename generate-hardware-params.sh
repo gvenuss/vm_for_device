@@ -400,27 +400,43 @@ echo "MAC 地址: $MAC_ADDRESS"
 echo ""
 
 echo "=========================================="
-echo "  生成的 QEMU 配置参数"
+echo "  生成的 create-windows-vm.sh 兼容配置"
 echo "=========================================="
 echo ""
 
+# 生成与 create-windows-vm.sh 兼容的变量定义格式
 cat << EOF
-# SMBIOS 配置
--smbios type=0,vendor="$BIOS_VENDOR",version="$BIOS_VERSION",date="$BIOS_DATE" \\
--smbios type=1,manufacturer="$MANUFACTURER",product="$PRODUCT",version="1.0",serial="$SYSTEM_SERIAL",uuid="$SYSTEM_UUID",sku="SKU-001",family="Desktop" \\
--smbios type=2,manufacturer="$MANUFACTURER",product="$BOARD_MODEL",version="$BOARD_VERSION",serial="$BOARD_SERIAL",asset="$BOARD_ASSET",location="Base Board" \\
--smbios type=3,manufacturer="$MANUFACTURER",version="1.0",serial="$CHASSIS_SERIAL",asset="$CHASSIS_ASSET" \\
+# 硬件信息自定义
+BIOS_VENDOR="$BIOS_VENDOR"
+BIOS_VERSION="$BIOS_VERSION"
+BIOS_DATE="$BIOS_DATE"
 
-# CPU 配置
--cpu host,vendor=$PRODUCT_CPU_VENDOR \\
+SYSTEM_MANUFACTURER="$MANUFACTURER"
+SYSTEM_PRODUCT="$PRODUCT"
+SYSTEM_VERSION="1.0"
+SYSTEM_SERIAL="$SYSTEM_SERIAL"
+SYSTEM_UUID="$SYSTEM_UUID"
+SYSTEM_SKU="SKU-001"
+SYSTEM_FAMILY="Desktop"
 
-# 硬盘配置
--drive file=disk.qcow2,if=none,id=disk0,format=qcow2 \\
--device ide-hd,drive=disk0,serial="$HDD_SERIAL",model="$HDD_MODEL",wwn=$HDD_WWN \\
+BOARD_MANUFACTURER="$MANUFACTURER"
+BOARD_PRODUCT="$BOARD_MODEL"
+BOARD_VERSION="$BOARD_VERSION"
+BOARD_SERIAL="$BOARD_SERIAL"
+BOARD_ASSET="$BOARD_ASSET"
 
-# 网卡配置
--netdev user,id=net0 \\
--device e1000,netdev=net0,mac=$MAC_ADDRESS
+CHASSIS_MANUFACTURER="$MANUFACTURER"
+CHASSIS_VERSION="1.0"
+CHASSIS_SERIAL="$CHASSIS_SERIAL"
+CHASSIS_ASSET="$CHASSIS_ASSET"
+
+# 硬盘信息
+HDD_SERIAL="$HDD_SERIAL"
+HDD_MODEL="$HDD_MODEL"
+HDD_WWN="$HDD_WWN"
+
+# 网卡 MAC 地址
+MAC_ADDRESS="$MAC_ADDRESS"
 EOF
 
 echo ""
@@ -428,7 +444,7 @@ echo "=========================================="
 echo "  配置已生成完成"
 echo "=========================================="
 echo ""
-echo "提示: 将上述配置复制到你的 QEMU 启动脚本中"
+echo "提示: 将上述变量配置复制到 create-windows-vm.sh 的配置参数部分"
 echo ""
 
 # 可选: 保存到文件
@@ -472,17 +488,39 @@ MAC 地址: $MAC_ADDRESS
 
 ---
 
-QEMU 配置参数:
+create-windows-vm.sh 配置变量:
 
--smbios type=0,vendor="$BIOS_VENDOR",version="$BIOS_VERSION",date="$BIOS_DATE" \\
--smbios type=1,manufacturer="$MANUFACTURER",product="$PRODUCT",version="1.0",serial="$SYSTEM_SERIAL",uuid="$SYSTEM_UUID",sku="SKU-001",family="Desktop" \\
--smbios type=2,manufacturer="$MANUFACTURER",product="$BOARD_MODEL",version="$BOARD_VERSION",serial="$BOARD_SERIAL",asset="$BOARD_ASSET",location="Base Board" \\
--smbios type=3,manufacturer="$MANUFACTURER",version="1.0",serial="$CHASSIS_SERIAL",asset="$CHASSIS_ASSET" \\
--cpu host,vendor=$PRODUCT_CPU_VENDOR \\
--drive file=disk.qcow2,if=none,id=disk0,format=qcow2 \\
--device ide-hd,drive=disk0,serial="$HDD_SERIAL",model="$HDD_MODEL",wwn=$HDD_WWN \\
--netdev user,id=net0 \\
--device e1000,netdev=net0,mac=$MAC_ADDRESS
+# 硬件信息自定义
+BIOS_VENDOR="$BIOS_VENDOR"
+BIOS_VERSION="$BIOS_VERSION"
+BIOS_DATE="$BIOS_DATE"
+
+SYSTEM_MANUFACTURER="$MANUFACTURER"
+SYSTEM_PRODUCT="$PRODUCT"
+SYSTEM_VERSION="1.0"
+SYSTEM_SERIAL="$SYSTEM_SERIAL"
+SYSTEM_UUID="$SYSTEM_UUID"
+SYSTEM_SKU="SKU-001"
+SYSTEM_FAMILY="Desktop"
+
+BOARD_MANUFACTURER="$MANUFACTURER"
+BOARD_PRODUCT="$BOARD_MODEL"
+BOARD_VERSION="$BOARD_VERSION"
+BOARD_SERIAL="$BOARD_SERIAL"
+BOARD_ASSET="$BOARD_ASSET"
+
+CHASSIS_MANUFACTURER="$MANUFACTURER"
+CHASSIS_VERSION="1.0"
+CHASSIS_SERIAL="$CHASSIS_SERIAL"
+CHASSIS_ASSET="$CHASSIS_ASSET"
+
+# 硬盘信息
+HDD_SERIAL="$HDD_SERIAL"
+HDD_MODEL="$HDD_MODEL"
+HDD_WWN="$HDD_WWN"
+
+# 网卡 MAC 地址
+MAC_ADDRESS="$MAC_ADDRESS"
 EOF
     echo "配置已保存到: $OUTPUT_FILE"
 fi
