@@ -3,7 +3,48 @@
 ################################################################################
 # Windows 10/11 虚拟机启动脚本 (反虚拟化检测配置)
 # 用途: 创建一个难以被检测为虚拟机的 Windows 环境
+# 支持从 generate-hardware-params.sh 自动加载配置
 ################################################################################
+
+# 检查是否传入配置文件
+if [ "$1" = "--config" ] && [ -n "$2" ]; then
+    echo "加载配置文件: $2"
+    if [ -f "$2" ]; then
+        # 尝试加载配置
+        if grep -q "# 硬件信息自定义" "$2"; then
+            # 提取配置变量
+            TMP_CONFIG=$(mktemp /tmp/vm-tmp-config.XXXXXX)
+            grep -A 40 "# 硬件信息自定义" "$2" > $TMP_CONFIG
+            # 尝试执行配置（安全检查）
+            if grep -E '^(BIOS_VENDOR|BIOS_VERSION|BIOS_DATE|SYSTEM_MANUFACTURER|SYSTEM_PRODUCT|SYSTEM_VERSION|SYSTEM_SERIAL|SYSTEM_UUID|SYSTEM_SKU|SYSTEM_FAMILY|BOARD_MANUFACTURER|BOARD_PRODUCT|BOARD_VERSION|BOARD_SERIAL|BOARD_ASSET|CHASSIS_MANUFACTURER|CHASSIS_VERSION|CHASSIS_SERIAL|CHASSIS_ASSET|GPU_VENDOR|GPU_MODEL|GPU_VENDOR_ID|GPU_DEVICE_ID|GPU_VRAM|GPU_MEM_TYPE|GPU_SERIAL|GPU_BIOS_VERSION|SOUND_CARD|SOUND_VENDOR|SOUND_SERIAL|RAM_BRAND|RAM_CAPACITY|RAM_SPEED|RAM_TYPE|RAM_SERIAL|RAM_PART_NUMBER|PSU_BRAND|PSU_MODEL|PSU_WATTAGE|PSU_SERIAL|HDD_SERIAL|HDD_MODEL|HDD_WWN|MAC_ADDRESS)=' $TMP_CONFIG > /dev/null 2>&1; then
+                source $TMP_CONFIG
+                echo "✓ 配置加载成功"
+            else
+                echo "警告: 配置文件格式不正确，使用默认配置"
+            fi
+        else
+            echo "警告: 配置文件不是 generate-hardware-params.sh 格式，使用默认配置"
+        fi
+        rm -f $TMP_CONFIG
+    else
+        echo "警告: 配置文件不存在，使用默认配置"
+    fi
+elif [ "$1" = "--generate" ]; then
+    echo "自动生成新配置并启动..."
+    TMP_CONFIG=$(mktemp /tmp/vm-gen-config.XXXXXX)
+    ./generate-hardware-params.sh > $TMP_CONFIG 2>&1
+    if [ $? -eq 0 ]; then
+        # 提取配置变量
+        grep -A 40 "# 硬件信息自定义" $TMP_CONFIG > /tmp/vm-extract-config.txt
+        source /tmp/vm-extract-config.txt
+        echo "✓ 配置生成并加载成功"
+        rm -f /tmp/vm-extract-config.txt
+    else
+        echo "警告: 配置生成失败，使用默认配置"
+    fi
+else
+    echo "使用默认配置启动"
+fi
 
 # 配置参数
 VM_NAME="Windows-Desktop"
@@ -37,6 +78,35 @@ CHASSIS_MANUFACTURER="ASUS"
 CHASSIS_VERSION="1.0"
 CHASSIS_SERIAL="CH20210812001"
 CHASSIS_ASSET="Asset-CH-001"
+
+# 显卡信息
+GPU_VENDOR="NVIDIA"
+GPU_MODEL="GeForce RTX 3060"
+GPU_VENDOR_ID="10DE"
+GPU_DEVICE_ID="2487"
+GPU_VRAM="8GB"
+GPU_MEM_TYPE="GDDR6"
+GPU_SERIAL="NV20210812001"
+GPU_BIOS_VERSION="86.04.45.00"
+
+# 声卡信息
+SOUND_CARD="Realtek ALC887"
+SOUND_VENDOR="Realtek"
+SOUND_SERIAL="SND20210812001"
+
+# 内存信息
+RAM_BRAND="${RAM_BRAND:-"Samsung"}"
+RAM_CAPACITY="${RAM_CAPACITY:-"16GB"}"
+RAM_SPEED="${RAM_SPEED:-"3200MHz"}"
+RAM_TYPE="${RAM_TYPE:-"DDR4"}"
+RAM_SERIAL="${RAM_SERIAL:-"SM20210812001"}"
+RAM_PART_NUMBER="${RAM_PART_NUMBER:-"SMG2021"}"
+
+# 电源信息
+PSU_BRAND="${PSU_BRAND:-"Corsair"}"
+PSU_MODEL="${PSU_MODEL:-"Corsair RM650x"}"
+PSU_WATTAGE="${PSU_WATTAGE:-"650W"}"
+PSU_SERIAL="${PSU_SERIAL:-"CS20210812001"}"
 
 # 硬盘信息
 HDD_SERIAL="WD-WCAV29472851"
@@ -115,7 +185,11 @@ qemu-system-x86_64 \
   -netdev user,id=net0,hostfwd=tcp::3389-:3389 \
   -device e1000,netdev=net0,mac=$MAC_ADDRESS \
   \
-  -device virtio-vga,xres=1920,yres=1080 \
+  # 声卡配置
+  -soundhw hda \
+  \
+  # 显卡配置 - 使用 virtio-vga 但模拟更真实的属性
+  -device virtio-vga,xres=1920,yres=1080,id=video0,bus=pcie.0,addr=0x1 \
   -vnc :0 \
   -device qemu-xhci,id=xhci \
   -device usb-tablet,bus=xhci.0 \

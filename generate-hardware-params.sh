@@ -43,6 +43,20 @@ generate_mac() {
 generate_date_range() {
     local start_year=$1
     local end_year=$2
+
+    # 获取当前年份
+    local current_year=$(date +"%Y")
+
+    # 确保结束年份不超过当前年份
+    if [ $end_year -gt $current_year ]; then
+        end_year=$current_year
+    fi
+
+    # 确保开始年份不大于结束年份
+    if [ $start_year -gt $end_year ]; then
+        start_year=$end_year
+    fi
+
     local start_days=$(( (start_year - 2020) * 365 ))
     local end_days=$(( (end_year - 2020) * 365 ))
     local days_range=$(( end_days - start_days ))
@@ -312,8 +326,60 @@ echo "机箱序列号: $CHASSIS_SERIAL"
 echo "资产标签: $CHASSIS_ASSET"
 echo ""
 
-# 6. 硬盘信息
-echo "6. 硬盘信息"
+# 6. 显卡信息
+echo "6. 显卡信息"
+echo "----------------------------"
+
+# 常见显卡厂商和型号
+GPU_VENDORS=("NVIDIA" "AMD" "Intel")
+
+GPU_INFO=()
+
+GPU_INFO+=("NVIDIA:GeForce RTX 3060:10DE:2487:8GB:GDDR6:RTX-3060")
+GPU_INFO+=("NVIDIA:GeForce RTX 3070:10DE:249D:8GB:GDDR6:RTX-3070")
+GPU_INFO+=("NVIDIA:GeForce RTX 3080:10DE:2206:10GB:GDDR6X:RTX-3080")
+GPU_INFO+=("NVIDIA:GeForce RTX 4060:10DE:28A1:8GB:GDDR6:RTX-4060")
+GPU_INFO+=("NVIDIA:GeForce RTX 4070:10DE:2786:12GB:GDDR6X:RTX-4070")
+GPU_INFO+=("NVIDIA:GeForce GTX 1660 Super:10DE:21C4:6GB:GDDR6:GTX-1660S")
+GPU_INFO+=("NVIDIA:GeForce GTX 1650:10DE:1F82:4GB:GDDR5:GTX-1650")
+GPU_INFO+=("AMD:Radeon RX 6600 XT:1002:73FF:8GB:GDDR6:RX-6600XT")
+GPU_INFO+=("AMD:Radeon RX 6700 XT:1002:73DF:12GB:GDDR6:RX-6700XT")
+GPU_INFO+=("AMD:Radeon RX 6800 XT:1002:73BF:16GB:GDDR6:RX-6800XT")
+GPU_INFO+=("AMD:Radeon RX 7600 XT:1002:7431:8GB:GDDR6:RX-7600XT")
+GPU_INFO+=("AMD:Radeon RX 7700 XT:1002:744C:12GB:GDDR6X:RX-7700XT")
+GPU_INFO+=("AMD:Radeon RX 580:1002:67DF:8GB:GDDR5:RX-580")
+GPU_INFO+=("Intel:UHD Graphics 750:8086:4C8A:1GB:DDR4:UHD-750")
+GPU_INFO+=("Intel:Iris Xe Graphics:8086:9A70:4GB:LPDDR4X:IRIS-XE")
+GPU_INFO+=("Intel:Arc A380:8086:56A5:6GB:GDDR6:ARC-A380")
+
+# 随机选择显卡
+GPU_INDEX=$((RANDOM % ${#GPU_INFO[@]}))
+GPU_DETAIL=${GPU_INFO[$GPU_INDEX]}
+
+GPU_VENDOR=$(echo $GPU_DETAIL | cut -d: -f1)
+GPU_MODEL=$(echo $GPU_DETAIL | cut -d: -f2)
+GPU_VENDOR_ID=$(echo $GPU_DETAIL | cut -d: -f3)
+GPU_DEVICE_ID=$(echo $GPU_DETAIL | cut -d: -f4)
+GPU_VRAM=$(echo $GPU_DETAIL | cut -d: -f5)
+GPU_MEM_TYPE=$(echo $GPU_DETAIL | cut -d: -f6)
+GPU_PCI_ID=$(echo $GPU_DETAIL | cut -d: -f7)
+
+# 生成显卡序列号和 BIOS 版本
+GPU_SERIAL=$(generate_serial "$(echo $GPU_VENDOR | cut -c1-2)" 10)
+GPU_BIOS_VERSION=$(printf "86.04.45.%02d" $((RANDOM % 100)))
+
+echo "显卡厂商: $GPU_VENDOR"
+echo "显卡型号: $GPU_MODEL"
+echo "厂商 ID: $GPU_VENDOR_ID"
+echo "设备 ID: $GPU_DEVICE_ID"
+echo "显存: $GPU_VRAM"
+echo "显存类型: $GPU_MEM_TYPE"
+echo "序列号: $GPU_SERIAL"
+echo "BIOS 版本: $GPU_BIOS_VERSION"
+echo ""
+
+# 7. 硬盘信息
+echo "7. 硬盘信息"
 echo "----------------------------"
 HDD_BRANDS=("WDC" "Samsung" "Seagate" "Crucial" "Kingston" "Toshiba" "SanDisk")
 HDD_BRAND=${HDD_BRANDS[$RANDOM % ${#HDD_BRANDS[@]}]}
@@ -384,8 +450,8 @@ echo "WWN: $HDD_WWN"
 echo "固件版本: $HDD_FIRMWARE"
 echo ""
 
-# 7. 网卡信息
-echo "7. 网卡信息"
+# 8. 网卡信息
+echo "8. 网卡信息"
 echo "----------------------------"
 # 常见网卡厂商 OUI
 NIC_VENDORS=("Intel:00:1B:21" "Realtek:00:E0:4C" "Broadcom:00:10:18" "Qualcomm:00:03:7F")
@@ -397,6 +463,92 @@ MAC_ADDRESS=$(generate_mac "$NIC_OUI")
 
 echo "网卡厂商: $NIC_NAME"
 echo "MAC 地址: $MAC_ADDRESS"
+echo ""
+
+# 9. 声卡信息
+echo "9. 声卡信息"
+echo "----------------------------"
+SOUND_CARDS=("Realtek ALC887" "Realtek ALC1220" "Realtek ALC1200" "Sound Blaster X-Fi" "Creative Sound Core3D")
+SOUND_CARD=${SOUND_CARDS[$RANDOM % ${#SOUND_CARDS[@]}]}
+
+SOUND_SERIAL=$(generate_serial "SND" 6)
+SOUND_VENDOR="Realtek"
+if [[ $SOUND_CARD == *"Sound Blaster"* || $SOUND_CARD == *"Creative"* ]]; then
+    SOUND_VENDOR="Creative"
+fi
+
+echo "声卡型号: $SOUND_CARD"
+echo "声卡厂商: $SOUND_VENDOR"
+echo "声卡序列号: $SOUND_SERIAL"
+echo ""
+
+# 10. 内存信息
+echo "10. 内存信息"
+echo "----------------------------"
+RAM_BRANDS=("Samsung" "Micron" "SK Hynix" "Crucial" "G.Skill")
+RAM_BRAND=${RAM_BRANDS[$RANDOM % ${#RAM_BRANDS[@]}]}
+
+RAM_CAPACITIES=("8GB" "16GB" "32GB")
+RAM_CAPACITY=${RAM_CAPACITIES[$RANDOM % ${#RAM_CAPACITIES[@]}]}
+
+RAM_SPEEDS=()
+if [[ $PRODUCT_CPU_VENDOR == "Intel" ]]; then
+    case $PRODUCT_CPU_GEN in
+        "12") RAM_SPEEDS=("3200MHz" "3600MHz" "4000MHz") ;;
+        "11") RAM_SPEEDS=("2666MHz" "3000MHz" "3200MHz") ;;
+        "10") RAM_SPEEDS=("2666MHz" "2933MHz" "3000MHz") ;;
+    esac
+else
+    case $PRODUCT_CPU_GEN in
+        "5000") RAM_SPEEDS=("3200MHz" "3600MHz" "4000MHz") ;;
+        "3000") RAM_SPEEDS=("2666MHz" "3000MHz" "3200MHz") ;;
+    esac
+fi
+RAM_SPEED=${RAM_SPEEDS[$RANDOM % ${#RAM_SPEEDS[@]}]}
+
+RAM_TYPE="DDR4"
+if [[ ($PRODUCT_CPU_VENDOR == "Intel" && $PRODUCT_CPU_GEN == "12") || ($PRODUCT_CPU_VENDOR == "AMD" && $PRODUCT_CPU_GEN == "5000") ]]; then
+    random_val=$((RANDOM % 2))
+    if [ $random_val -eq 0 ]; then
+        RAM_TYPE="DDR5"
+        RAM_SPEEDS=("4800MHz" "5200MHz" "5600MHz")
+        RAM_SPEED=${RAM_SPEEDS[$RANDOM % ${#RAM_SPEEDS[@]}]}
+    fi
+fi
+
+RAM_SERIAL=$(generate_serial "$(echo $RAM_BRAND | cut -c1-2)" 8)
+RAM_PART_NUMBER=$(generate_serial "$(echo $RAM_BRAND | cut -c1-3)" 6)
+
+echo "内存品牌: $RAM_BRAND"
+echo "内存容量: $RAM_CAPACITY"
+echo "内存速度: $RAM_SPEED"
+echo "内存类型: $RAM_TYPE"
+echo "内存序列号: $RAM_SERIAL"
+echo "内存型号: $RAM_PART_NUMBER"
+echo ""
+
+# 11. 电源信息
+echo "11. 电源信息"
+echo "----------------------------"
+PSU_BRANDS=("Corsair" "EVGA" "Cooler Master" "Thermaltake" "Seasonic")
+PSU_BRAND=${PSU_BRANDS[$RANDOM % ${#PSU_BRANDS[@]}]}
+
+PSU_WATTAGES=("550W" "650W" "750W" "850W" "1000W")
+PSU_WATTAGE=${PSU_WATTAGES[$RANDOM % ${#PSU_WATTAGES[@]}]}
+
+# 根据系统类型选择电源信息
+if [[ $SYSTEM_TYPE == "OEM" ]]; then
+    PSU_MODEL="${MANUFACTURER} ${PSU_WATTAGE} Power Supply"
+else
+    PSU_MODEL="${PSU_BRAND} RM${PSU_WATTAGE/[^0-9]/}x"
+fi
+
+PSU_SERIAL=$(generate_serial "$(echo $PSU_BRAND | cut -c1-2)" 6)
+
+echo "电源品牌: $PSU_BRAND"
+echo "电源型号: $PSU_MODEL"
+echo "电源功率: $PSU_WATTAGE"
+echo "电源序列号: $PSU_SERIAL"
 echo ""
 
 echo "=========================================="
@@ -429,6 +581,35 @@ CHASSIS_MANUFACTURER="$MANUFACTURER"
 CHASSIS_VERSION="1.0"
 CHASSIS_SERIAL="$CHASSIS_SERIAL"
 CHASSIS_ASSET="$CHASSIS_ASSET"
+
+# 显卡信息
+GPU_VENDOR="$GPU_VENDOR"
+GPU_MODEL="$GPU_MODEL"
+GPU_VENDOR_ID="$GPU_VENDOR_ID"
+GPU_DEVICE_ID="$GPU_DEVICE_ID"
+GPU_VRAM="$GPU_VRAM"
+GPU_MEM_TYPE="$GPU_MEM_TYPE"
+GPU_SERIAL="$GPU_SERIAL"
+GPU_BIOS_VERSION="$GPU_BIOS_VERSION"
+
+# 声卡信息
+SOUND_CARD="$SOUND_CARD"
+SOUND_VENDOR="$SOUND_VENDOR"
+SOUND_SERIAL="$SOUND_SERIAL"
+
+# 内存信息
+RAM_BRAND="$RAM_BRAND"
+RAM_CAPACITY="$RAM_CAPACITY"
+RAM_SPEED="$RAM_SPEED"
+RAM_TYPE="$RAM_TYPE"
+RAM_SERIAL="$RAM_SERIAL"
+RAM_PART_NUMBER="$RAM_PART_NUMBER"
+
+# 电源信息
+PSU_BRAND="$PSU_BRAND"
+PSU_MODEL="$PSU_MODEL"
+PSU_WATTAGE="$PSU_WATTAGE"
+PSU_SERIAL="$PSU_SERIAL"
 
 # 硬盘信息
 HDD_SERIAL="$HDD_SERIAL"
@@ -477,6 +658,15 @@ CPU 型号: $CPU_MODEL
 APIC ID: $CPU_APIC_ID
 微码版本: $CPU_MICROCODE
 
+显卡厂商: $GPU_VENDOR
+显卡型号: $GPU_MODEL
+厂商 ID: $GPU_VENDOR_ID
+设备 ID: $GPU_DEVICE_ID
+显存: $GPU_VRAM
+显存类型: $GPU_MEM_TYPE
+序列号: $GPU_SERIAL
+BIOS 版本: $GPU_BIOS_VERSION
+
 硬盘品牌: $HDD_BRAND
 硬盘型号: $HDD_MODEL
 硬盘序列号: $HDD_SERIAL
@@ -485,6 +675,22 @@ WWN: $HDD_WWN
 
 网卡厂商: $NIC_NAME
 MAC 地址: $MAC_ADDRESS
+
+声卡型号: $SOUND_CARD
+声卡厂商: $SOUND_VENDOR
+声卡序列号: $SOUND_SERIAL
+
+内存品牌: $RAM_BRAND
+内存容量: $RAM_CAPACITY
+内存速度: $RAM_SPEED
+内存类型: $RAM_TYPE
+内存序列号: $RAM_SERIAL
+内存型号: $RAM_PART_NUMBER
+
+电源品牌: $PSU_BRAND
+电源型号: $PSU_MODEL
+电源功率: $PSU_WATTAGE
+电源序列号: $PSU_SERIAL
 
 ---
 
@@ -513,6 +719,35 @@ CHASSIS_MANUFACTURER="$MANUFACTURER"
 CHASSIS_VERSION="1.0"
 CHASSIS_SERIAL="$CHASSIS_SERIAL"
 CHASSIS_ASSET="$CHASSIS_ASSET"
+
+# 显卡信息
+GPU_VENDOR="$GPU_VENDOR"
+GPU_MODEL="$GPU_MODEL"
+GPU_VENDOR_ID="$GPU_VENDOR_ID"
+GPU_DEVICE_ID="$GPU_DEVICE_ID"
+GPU_VRAM="$GPU_VRAM"
+GPU_MEM_TYPE="$GPU_MEM_TYPE"
+GPU_SERIAL="$GPU_SERIAL"
+GPU_BIOS_VERSION="$GPU_BIOS_VERSION"
+
+# 声卡信息
+SOUND_CARD="$SOUND_CARD"
+SOUND_VENDOR="$SOUND_VENDOR"
+SOUND_SERIAL="$SOUND_SERIAL"
+
+# 内存信息
+RAM_BRAND="$RAM_BRAND"
+RAM_CAPACITY="$RAM_CAPACITY"
+RAM_SPEED="$RAM_SPEED"
+RAM_TYPE="$RAM_TYPE"
+RAM_SERIAL="$RAM_SERIAL"
+RAM_PART_NUMBER="$RAM_PART_NUMBER"
+
+# 电源信息
+PSU_BRAND="$PSU_BRAND"
+PSU_MODEL="$PSU_MODEL"
+PSU_WATTAGE="$PSU_WATTAGE"
+PSU_SERIAL="$PSU_SERIAL"
 
 # 硬盘信息
 HDD_SERIAL="$HDD_SERIAL"
