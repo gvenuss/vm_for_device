@@ -172,7 +172,7 @@ echo ""
 qemu-system-x86_64 \
   -name "$VM_NAME" \
   -machine type=q35,accel=$ACCEL \
-  -cpu host,kvm=off,hv_vendor_id=GenuineIntel,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time \
+  -cpu host,kvm=off,hypervisor=off,hv_vendor_id=GenuineIntel,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_reset,hv_vpindex,hv_runtime,hv_synic,hv_stimer,hv_ipi,hv_frequencies,hv_signals,hv_registers \
   -smp cores=$CPU_CORES,threads=$CPU_THREADS,sockets=1 \
   -m $MEMORY \
   \
@@ -182,23 +182,27 @@ qemu-system-x86_64 \
   -smbios type=3,manufacturer="$CHASSIS_MANUFACTURER",version="$CHASSIS_VERSION",serial="$CHASSIS_SERIAL",asset="$CHASSIS_ASSET" \
   \
   -drive file="$DISK_IMAGE",if=none,id=disk0,format=qcow2,cache=writeback \
-  -device ide-hd,drive=disk0,serial="$HDD_SERIAL",model="$HDD_MODEL",wwn=$HDD_WWN \
+  -device ahci,id=ahci0,bus=pcie.0,addr=0x4 \
+  -device ide-hd,drive=disk0,bus=ahci0.0,serial="$HDD_SERIAL",model="$HDD_MODEL",wwn=$HDD_WWN \
   \
   -netdev user,id=net0,hostfwd=tcp::3389-:3389 \
-  -device e1000,netdev=net0,mac=$MAC_ADDRESS \
+  -device e1000,netdev=net0,mac=$MAC_ADDRESS,id=net0,bus=pcie.0,addr=0x5 \
   \
   # 音频配置 - 在没有音频设备的系统上使用空音频设备避免 ALSA 错误
   -audiodev none,id=audio0 \
   -device intel-hda,id=sound0,bus=pcie.0,addr=0x3 \
   -device hda-duplex,id=sound0-codec0,bus=sound0.0,cad=0,audiodev=audio0 \
   \
-  -device virtio-vga,xres=1920,yres=1080,id=video0,bus=pcie.0,addr=0x2 \
+  -device qxl-vga,xres=1920,yres=1080,id=video0,bus=pcie.0,addr=0x2 \
   -vnc :0 \
-  -device qemu-xhci,id=xhci \
+  -device qemu-xhci,id=xhci,bus=pcie.0,addr=0x6 \
   -device usb-tablet,bus=xhci.0 \
   \
   -cdrom "$ISO_PATH" \
   -boot order=$BOOT_ORDER \
   -rtc base=localtime,clock=host \
   -no-hpet \
-  -global kvm-pit.lost_tick_policy=discard
+  -global kvm-pit.lost_tick_policy=discard \
+  -global PIIX4_PM.disable_s3=1 \
+  -global PIIX4_PM.disable_s4=1 \
+  -machine pc-q35-7.2
