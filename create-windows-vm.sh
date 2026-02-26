@@ -31,8 +31,10 @@ if [ "$1" = "--config" ] && [ -n "$2" ]; then
     fi
 elif [ "$1" = "--generate" ]; then
     echo "自动生成新配置并启动..."
+    # 获取脚本所在的绝对路径
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     TMP_CONFIG=$(mktemp /tmp/vm-gen-config.XXXXXX)
-    ./generate-hardware-params.sh > $TMP_CONFIG 2>&1
+    "$SCRIPT_DIR/generate-hardware-params.sh" > $TMP_CONFIG 2>&1
     if [ $? -eq 0 ]; then
         # 提取配置变量
         grep -A 40 "# 硬件信息自定义" $TMP_CONFIG > /tmp/vm-extract-config.txt
