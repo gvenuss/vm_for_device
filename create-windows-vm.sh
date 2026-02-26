@@ -48,14 +48,14 @@ else
     echo "使用默认配置启动"
 fi
 
-# 配置参数
-VM_NAME="Windows-Desktop"
-DISK_IMAGE="windows10.qcow2"
-DISK_SIZE="100G"
-MEMORY="8192"  # MB
-CPU_CORES="4"
-CPU_THREADS="2"
-ISO_PATH="/app/windows_vm/windows.iso"
+# 配置参数 - 确保这些参数不会被配置文件覆盖
+VM_NAME="${VM_NAME:-"Windows-Desktop"}"
+DISK_IMAGE="${DISK_IMAGE:-"windows10.qcow2"}"
+DISK_SIZE="${DISK_SIZE:-"100G"}"
+MEMORY="${MEMORY:-"8192"}"  # MB
+CPU_CORES="${CPU_CORES:-"4"}"
+CPU_THREADS="${CPU_THREADS:-"2"}"
+ISO_PATH="${ISO_PATH:-"/app/windows_vm/windows.iso"}"
 
 # 硬件信息自定义
 BIOS_VENDOR="American Megatrends Inc."
