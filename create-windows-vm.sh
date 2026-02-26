@@ -204,5 +204,4 @@ qemu-system-x86_64 \
   -no-hpet \
   -global kvm-pit.lost_tick_policy=discard \
   -global PIIX4_PM.disable_s3=1 \
-  -global PIIX4_PM.disable_s4=1 \
-  -machine pc-q35-7.2
+  -global PIIX4_PM.disable_s4=1
