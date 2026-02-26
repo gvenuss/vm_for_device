@@ -172,7 +172,7 @@ echo ""
 qemu-system-x86_64 \
   -name "$VM_NAME" \
   -machine type=q35,accel=$ACCEL \
-  -cpu host,kvm=off,hypervisor=off,hv_vendor_id=GenuineIntel,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_reset,hv_vpindex,hv_runtime,hv_synic,hv_stimer,hv_ipi,hv_frequencies,hv_signals,hv_registers \
+  -cpu host,kvm=off,hypervisor=off,hv_vendor_id=GenuineIntel,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time \
   -smp cores=$CPU_CORES,threads=$CPU_THREADS,sockets=1 \
   -m $MEMORY \
   \
