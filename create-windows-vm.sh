@@ -185,11 +185,12 @@ qemu-system-x86_64 \
   -netdev user,id=net0,hostfwd=tcp::3389-:3389 \
   -device e1000,netdev=net0,mac=$MAC_ADDRESS \
   \
-  # 声卡配置
-  -soundhw hda \
+  # 声卡配置 - 使用推荐的配置代替过时的 -soundhw hda
+  -device intel-hda,id=sound0,bus=pcie.0,addr=0x1 \
+  -device hda-duplex,id=sound0-codec0,bus=sound0.0,cad=0 \
   \
   # 显卡配置 - 使用 virtio-vga 但模拟更真实的属性
-  -device virtio-vga,xres=1920,yres=1080,id=video0,bus=pcie.0,addr=0x1 \
+  -device virtio-vga,xres=1920,yres=1080,id=video0,bus=pcie.0,addr=0x2 \
   -vnc :0 \
   -device qemu-xhci,id=xhci \
   -device usb-tablet,bus=xhci.0 \
