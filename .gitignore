@@ -1,0 +1,53 @@
+# Claude Code 配置文件
+.claude/
+*.local.json
+
+# 临时文件
+*.tmp
+*.temp
+temp_*.txt
+
+# 虚拟机配置文件
+vm-config-*.txt
+vm-tmp-config-*.txt
+vm-gen-config-*.txt
+vm-extract-config.txt
+
+# QEMU 虚拟机文件
+*.qcow2
+*.img
+*.iso
+*.vhdx
+*.vmdk
+
+# 系统文件
+Thumbs.db
+.DS_Store
+
+# 日志文件
+*.log
+*.out
+
+# 备份文件
+*.bak
+*.backup
+*~
+
+# 编译文件
+*.o
+*.so
+*.dll
+*.exe
+*.pyc
+__pycache__/
+
+# 环境文件
+.env
+.env.local
+.env.*.local
+
+# IDE 配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
