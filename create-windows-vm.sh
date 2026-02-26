@@ -171,37 +171,36 @@ echo ""
 # 启动 QEMU
 qemu-system-x86_64 \
   -name "$VM_NAME" \
-  -machine type=q35,accel=$ACCEL \
-  -cpu host,kvm=off,hypervisor=off,hv_vendor_id=GenuineIntel,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time \
+  -machine type=q35,accel=$ACCEL,vmport=off \
+  -cpu host,kvm=off,hypervisor=off,hv_vendor_id=GenuineIntel,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,hv_reset,hv_vpindex,hv_runtime,hv_synic,hv_stimer \
   -smp cores=$CPU_CORES,threads=$CPU_THREADS,sockets=1 \
-  -m $MEMORY \
-  \
+  -m $MEMORY,slots=4,maxmem=$((MEMORY * 2))M \
   -smbios type=0,vendor="$BIOS_VENDOR",version="$BIOS_VERSION",date="$BIOS_DATE" \
   -smbios type=1,manufacturer="$SYSTEM_MANUFACTURER",product="$SYSTEM_PRODUCT",version="$SYSTEM_VERSION",serial="$SYSTEM_SERIAL",uuid="$SYSTEM_UUID",sku="$SYSTEM_SKU",family="$SYSTEM_FAMILY" \
   -smbios type=2,manufacturer="$BOARD_MANUFACTURER",product="$BOARD_PRODUCT",version="$BOARD_VERSION",serial="$BOARD_SERIAL",asset="$BOARD_ASSET",location="Base Board" \
   -smbios type=3,manufacturer="$CHASSIS_MANUFACTURER",version="$CHASSIS_VERSION",serial="$CHASSIS_SERIAL",asset="$CHASSIS_ASSET" \
-  \
   -drive file="$DISK_IMAGE",if=none,id=disk0,format=qcow2,cache=writeback \
   -device ahci,id=ahci0,bus=pcie.0,addr=0x4 \
   -device ide-hd,drive=disk0,bus=ahci0.0,serial="$HDD_SERIAL",model="$HDD_MODEL",wwn=$HDD_WWN \
-  \
   -netdev user,id=net0,hostfwd=tcp::3389-:3389 \
   -device e1000,netdev=net0,mac=$MAC_ADDRESS,id=net0,bus=pcie.0,addr=0x5 \
-  \
-  # 音频配置 - 在没有音频设备的系统上使用空音频设备避免 ALSA 错误
   -audiodev none,id=audio0 \
   -device intel-hda,id=sound0,bus=pcie.0,addr=0x3 \
   -device hda-duplex,id=sound0-codec0,bus=sound0.0,cad=0,audiodev=audio0 \
-  \
   -device qxl-vga,xres=1920,yres=1080,id=video0,bus=pcie.0,addr=0x2 \
   -vnc :0 \
   -device qemu-xhci,id=xhci,bus=pcie.0,addr=0x6 \
   -device usb-tablet,bus=xhci.0 \
-  \
   -cdrom "$ISO_PATH" \
   -boot order=$BOOT_ORDER \
   -rtc base=localtime,clock=host \
   -no-hpet \
   -global kvm-pit.lost_tick_policy=discard \
   -global PIIX4_PM.disable_s3=1 \
-  -global PIIX4_PM.disable_s4=1
+  -global PIIX4_PM.disable_s4=1 \
+  -global ich9-pm-base.force-reset-without-acpi=true \
+  -device ich9-intel-hda,addr=0x1b,multifunction=on \
+  -device virtio-balloon-pci,id=balloon0,bus=pcie.0,addr=0x7,disable-legacy=on \
+  -nodefaults \
+  -device i82801b11-bridge,id=pci.1,bus=pcie.0,addr=0x1 \
+  -device pci-bridge,chassis_nr=2,id=pci.2,bus=pci.1,addr=0x1
