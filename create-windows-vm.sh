@@ -185,7 +185,7 @@ qemu-system-x86_64 \
   -netdev user,id=net0,hostfwd=tcp::3389-:3389 \
   -device e1000,netdev=net0,mac=$MAC_ADDRESS \
   \
-  -device intel-hda,id=sound0,bus=pcie.0,addr=0x1 \
+  -device intel-hda,id=sound0,bus=pcie.0,addr=0x3 \
   -device hda-duplex,id=sound0-codec0,bus=sound0.0,cad=0 \
   \
   -device virtio-vga,xres=1920,yres=1080,id=video0,bus=pcie.0,addr=0x2 \
