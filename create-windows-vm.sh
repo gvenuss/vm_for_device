@@ -196,9 +196,8 @@ qemu-system-x86_64 \
   -rtc base=localtime,clock=host \
   -no-hpet \
   -global kvm-pit.lost_tick_policy=discard \
-  -global PIIX4_PM.disable_s3=1 \
-  -global PIIX4_PM.disable_s4=1 \
-  -global ich9-pm-base.force-reset-without-acpi=true \
+  -global ICH9-PM.disable_s3=1 \
+  -global ICH9-PM.disable_s4=1 \
   -device ich9-intel-hda,addr=0x1b,multifunction=on \
   -device virtio-balloon-pci,id=balloon0,bus=pcie.0,addr=0x7,disable-legacy=on \
   -nodefaults \
