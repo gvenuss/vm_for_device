@@ -13,6 +13,13 @@ vm-tmp-config-*.txt
 vm-gen-config-*.txt
 vm-extract-config.txt
 
+# 优化报告文件
+al-khaser-optimization-report-*.txt
+al-khaser-detection-results-*.txt
+
+# 任务文件
+update-task.json
+
 # QEMU 虚拟机文件
 *.qcow2
 *.img
