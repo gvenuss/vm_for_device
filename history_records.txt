@@ -1,0 +1,40 @@
+============================================
+历史记录保存
+============================================
+保存日期：2026年2月26日
+
+任务概述
+============================================
+本次任务主要是完成了 `generate-hardware-params.sh` 和 `create-windows-vm.sh` 两个脚本之间的所有变量匹配，确保生成的硬件参数能够完全应用于虚拟机配置。
+
+主要修改内容
+============================================
+
+1. 更新 `create-windows-vm.sh` 脚本
+   - 添加了显卡信息变量：GPU_VENDOR、GPU_MODEL、GPU_VENDOR_ID、GPU_DEVICE_ID、GPU_VRAM、GPU_MEM_TYPE、GPU_SERIAL、GPU_BIOS_VERSION
+   - 添加了声卡信息变量：SOUND_CARD、SOUND_VENDOR、SOUND_SERIAL
+   - 添加了内存信息变量：RAM_BRAND、RAM_CAPACITY、RAM_SPEED、RAM_TYPE、RAM_SERIAL、RAM_PART_NUMBER
+   - 添加了电源信息变量：PSU_BRAND、PSU_MODEL、PSU_WATTAGE、PSU_SERIAL
+   - 为所有新变量设置了合理的默认值
+
+2. 创建测试脚本
+   - 创建了 `test_variable_match.sh` 用于验证两个脚本之间的变量匹配情况
+   - 实现了变量定义分析和匹配检查功能
+   - 可以自动识别不匹配的变量并提供添加建议
+
+3. 变量匹配情况
+   - **所有变量完全匹配**
+   - 匹配的变量：BIOS_VENDOR、BIOS_VERSION、BIOS_DATE、SYSTEM_MANUFACTURER、SYSTEM_PRODUCT、SYSTEM_VERSION、SYSTEM_SERIAL、SYSTEM_UUID、SYSTEM_SKU、SYSTEM_FAMILY、BOARD_MANUFACTURER、BOARD_PRODUCT、BOARD_VERSION、BOARD_SERIAL、BOARD_ASSET、CHASSIS_MANUFACTURER、CHASSIS_VERSION、CHASSIS_SERIAL、CHASSIS_ASSET、HDD_SERIAL、HDD_MODEL、HDD_WWN、MAC_ADDRESS、GPU_VENDOR、GPU_MODEL、GPU_VENDOR_ID、GPU_DEVICE_ID、GPU_VRAM、GPU_MEM_TYPE、GPU_SERIAL、GPU_BIOS_VERSION、RAM_BRAND、RAM_CAPACITY、RAM_SPEED、RAM_TYPE、RAM_SERIAL、RAM_PART_NUMBER、PSU_BRAND、PSU_MODEL、PSU_WATTAGE、PSU_SERIAL、SOUND_CARD、SOUND_VENDOR、SOUND_SERIAL
+
+使用建议
+============================================
+1. 运行 `generate-hardware-params.sh` 脚本生成硬件参数
+2. 复制生成的变量配置部分到 `create-windows-vm.sh` 的配置参数部分
+3. 保存并运行 `create-windows-vm.sh` 脚本启动虚拟机
+4. （可选）使用 `test_variable_match.sh` 验证配置的完整性
+
+注意事项
+============================================
+- 需要确保QEMU已正确安装
+- 需要根据实际情况修改ISO文件路径和虚拟机配置参数
+- 使用 `test_variable_match.sh` 可以定期检查配置的一致性
