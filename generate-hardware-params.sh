@@ -266,6 +266,103 @@ echo "APIC ID: $CPU_APIC_ID"
 echo "微码版本: $CPU_MICROCODE"
 echo ""
 
+# 12. SMBIOS Type 4 (处理器信息)
+echo "12. 处理器详细信息 (SMBIOS Type 4)"
+echo "----------------------------"
+
+# 生成处理器插座类型
+CPU_SOCKETS=("LGA 1700" "LGA 1200" "AM4" "AM5")
+if [[ $PRODUCT_CPU_VENDOR == "Intel" ]]; then
+    case $PRODUCT_CPU_GEN in
+        "12") CPU_SOCKET="LGA 1700" ;;
+        "11") CPU_SOCKET="LGA 1200" ;;
+        "10") CPU_SOCKET="LGA 1200" ;;
+    esac
+else
+    case $PRODUCT_CPU_GEN in
+        "5000") CPU_SOCKET="AM4" ;;
+        "3000") CPU_SOCKET="AM4" ;;
+    esac
+fi
+
+echo "插座类型: $CPU_SOCKET"
+
+# 生成处理器电压
+CPU_VOLTAGE=$(printf "%.2fV" $((100 + RANDOM % 40))e-2)
+echo "电压: $CPU_VOLTAGE"
+
+# 生成处理器外部时钟
+CPU_EXTERNAL_CLOCK=$(printf "%dMHz" $((100 + RANDOM % 100)))
+echo "外部时钟: $CPU_EXTERNAL_CLOCK"
+
+# 生成处理器最大速度
+if [[ $PRODUCT_CPU_VENDOR == "Intel" ]]; then
+    case $PRODUCT_CPU_GEN in
+        "12") CPU_MAX_SPEED=$(printf "%dMHz" $((4500 + RANDOM % 2000))) ;;
+        "11") CPU_MAX_SPEED=$(printf "%dMHz" $((4000 + RANDOM % 1500))) ;;
+        "10") CPU_MAX_SPEED=$(printf "%dMHz" $((3800 + RANDOM % 1200))) ;;
+    esac
+else
+    case $PRODUCT_CPU_GEN in
+        "5000") CPU_MAX_SPEED=$(printf "%dMHz" $((4600 + RANDOM % 1400))) ;;
+        "3000") CPU_MAX_SPEED=$(printf "%dMHz" $((4200 + RANDOM % 1200))) ;;
+    esac
+fi
+echo "最大速度: $CPU_MAX_SPEED"
+
+# 生成处理器当前速度
+CPU_CURRENT_SPEED=$(printf "%dMHz" $((CPU_MAX_SPEED%1000 - RANDOM % 500)))
+echo "当前速度: $CPU_CURRENT_SPEED"
+echo ""
+
+# 13. SMBIOS Type 17 (内存设备信息)
+echo "13. 内存设备信息 (SMBIOS Type 17)"
+echo "----------------------------"
+
+# 生成内存设备位置
+RAM_LOCATIONS=("DIMM_A1" "DIMM_A2" "DIMM_B1" "DIMM_B2")
+RAM_LOCATION=${RAM_LOCATIONS[$RANDOM % ${#RAM_LOCATIONS[@]}]}
+echo "内存位置: $RAM_LOCATION"
+
+# 生成内存设备银行
+RAM_BANK=$(printf "Bank %d" $((RANDOM % 8 + 1)))
+echo "内存银行: $RAM_BANK"
+
+# 生成内存设备插槽
+RAM_SLOT=$(printf "Slot %d" $((RANDOM % 4 + 1)))
+echo "内存插槽: $RAM_SLOT"
+
+# 生成内存设备数据宽度
+RAM_DATA_WIDTH="64 bits"
+if [[ $RAM_CAPACITY == *"GB"* && ${RAM_CAPACITY%GB} -gt 8 ]]; then
+    if [ $((RANDOM % 2)) -eq 0 ]; then
+        RAM_DATA_WIDTH="128 bits"
+    fi
+fi
+echo "数据宽度: $RAM_DATA_WIDTH"
+
+# 生成内存设备总线宽度
+RAM_BUS_WIDTH="64 bits"
+echo "总线宽度: $RAM_BUS_WIDTH"
+
+# 生成内存设备制造商
+RAM_MANUFACTURERS=("Samsung" "Micron" "SK Hynix" "Crucial" "G.Skill" "Kingston")
+RAM_MANUFACTURER=${RAM_MANUFACTURERS[$RANDOM % ${#RAM_MANUFACTURERS[@]}]}
+echo "内存制造商: $RAM_MANUFACTURER"
+
+# 生成内存设备部件号
+RAM_PART_NO=$(generate_serial "$(echo $RAM_MANUFACTURER | cut -c1-3)" 8)
+echo "部件号: $RAM_PART_NO"
+
+# 生成内存设备序列号
+RAM_DEV_SERIAL=$(generate_serial "$(echo $RAM_MANUFACTURER | cut -c1-2)" 10)
+echo "设备序列号: $RAM_DEV_SERIAL"
+
+# 生成内存设备温度（模拟值）
+RAM_TEMP=$(printf "%d°C" $((30 + RANDOM % 25)))
+echo "温度: $RAM_TEMP"
+echo ""
+
 # 3. BIOS 信息 (日期必须在硬件发布之后)
 echo "3. BIOS 信息 (SMBIOS Type 0)"
 echo "----------------------------"
